@@ -175,7 +175,7 @@ export default function App() {
   const [loadProgress, setLoadProgress] = useState(0);
   const [showPopup, setShowPopup] = useState(false);
 
-  const frameCount = 595;
+  const frameCount = 1785;
   const airbnb = useRef({ frame: 0 });
 
   // Framer Motion Scroll for dynamic book
@@ -187,10 +187,10 @@ export default function App() {
 
   const ctaGlowOpacity = useTransform(scrollYProgress, [0.85, 0.95], [0, 1]);
 
-  // 🧊 Optimized Progressive Loader
+  // 🧊 Optimized Progressive Loader (30 FPS Version)
   useEffect(() => {
     const isMobile = window.innerWidth < 768;
-    const step = isMobile ? 3 : 1;
+    const step = isMobile ? 6 : 3; // Efficient sampling for 30fps fluidity
     const totalToLoad = Math.ceil(frameCount / step);
     const loadedImages: HTMLImageElement[] = new Array(totalToLoad);
     let loadedCount = 0;
@@ -200,7 +200,7 @@ export default function App() {
         return new Promise((resolve) => {
           const frameIndex = (i * step) + 1;
           const img = new Image();
-          img.src = `/frames/output_${frameIndex.toString().padStart(4, '0')}.jpg`;
+          img.src = `/frames 30/output_${frameIndex.toString().padStart(4, '0')}.jpg`;
           img.onload = () => {
             loadedImages[i] = img;
             loadedCount++;
@@ -213,8 +213,9 @@ export default function App() {
     };
 
     const startLoading = async () => {
-      // 1. Critical Batch: Load first 60 frames immediately (Experience Start)
-      const criticalBatch = Array.from({ length: Math.min(60, totalToLoad) }, (_, i) => i);
+      // 1. Critical Batch: Load first 180 frames worth of data (~30-60 images depending on step)
+      const criticalCount = Math.ceil(180 / step);
+      const criticalBatch = Array.from({ length: Math.min(criticalCount, totalToLoad) }, (_, i) => i);
       await loadBatch(criticalBatch);
       
       // Reconstruct initial map so we can at least show the first part
@@ -228,14 +229,14 @@ export default function App() {
       setIsLoaded(true);
       setTimeout(() => setShowPopup(true), 1200);
 
-      // 2. Background Batching: Load rest in chunks of 15
-      const remainingIndices = Array.from({ length: totalToLoad - 60 }, (_, i) => i + 60);
-      for (let i = 0; i < remainingIndices.length; i += 15) {
-        const batch = remainingIndices.slice(i, i + 15);
+      // 2. Background Batching: Load rest in larger chunks for 30fps
+      const remainingIndices = Array.from({ length: totalToLoad - criticalCount }, (_, i) => i + criticalCount);
+      for (let i = 0; i < remainingIndices.length; i += 30) {
+        const batch = remainingIndices.slice(i, i + 30);
         await loadBatch(batch);
         
         // Update images map periodically as background loads finish
-        if (i % 60 === 0 || i + 15 >= remainingIndices.length) {
+        if (i % 120 === 0 || i + 30 >= remainingIndices.length) {
           const updatedImages: HTMLImageElement[] = new Array(frameCount);
           for (let j = 0; j < updatedImages.length; j++) {
             const idx = Math.floor(j / step);
@@ -252,14 +253,14 @@ export default function App() {
 
   // Canvas + GSAP
   useEffect(() => {
-    if (!isLoaded || images.length === 0 || !canvasRef.current) return;
+    if (!isLoaded || !canvasRef.current) return;
 
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
     if (!context) return;
 
     const render = () => {
-      const idx = Math.floor(airbnb.current.frame);
+      const idx = Math.min(Math.floor(airbnb.current.frame), frameCount - 1);
       const img = imagesRef.current[idx];
       if (img && img.complete) {
         const cA = canvas.width / canvas.height;
@@ -276,7 +277,6 @@ export default function App() {
           oX = (canvas.width - dW) / 2;
         }
 
-        // Draw image directly over previous frame for smoother transitions
         context.drawImage(img, oX, oY, dW, dH);
       }
       if (progressRef.current) {
@@ -295,15 +295,16 @@ export default function App() {
 
     // Section reveals, Background Story-Sync, and Mobile Interactivity
     document.querySelectorAll('section').forEach((section, index) => {
+      // 30 FPS Scaled Flow Points
       const sectionFlow = [
-        { id: 'hero', start: 0, end: 110 },
-        { id: 'problem', start: 111, end: 240 },
-        { id: 'stuck', start: 241, end: 350 },
-        { id: 'ignition', start: 351, end: 420 },
-        { id: 'chapters', start: 421, end: 510 },
-        { id: 'who-it-is-for', start: 511, end: 550 },
-        { id: 'faq', start: 551, end: 570 },
-        { id: 'cta', start: 571, end: 594 }
+        { id: 'hero', start: 0, end: 320 },
+        { id: 'problem', start: 321, end: 720 },
+        { id: 'stuck', start: 721, end: 1050 },
+        { id: 'ignition', start: 1051, end: 1260 },
+        { id: 'chapters', start: 1261, end: 1530 },
+        { id: 'who-it-is-for', start: 1531, end: 1650 },
+        { id: 'faq', start: 1651, end: 1710 },
+        { id: 'cta', start: 1711, end: 1784 }
       ];
 
       const flow = sectionFlow.find(f => f.id === section.id);
