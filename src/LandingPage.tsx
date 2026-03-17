@@ -386,7 +386,7 @@ export default function LandingPage() {
   const handlePayment = () => {
     const options = {
       key: "rzp_live_SPxvJUDxfHYcG6",
-      amount: 49900, 
+      amount: 100, // 1 Rupee = 100 paise
       currency: "INR",
       name: "Unleash The Beast",
       description: "Social Anxiety And YOU - Ebook",
