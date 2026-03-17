@@ -169,6 +169,7 @@ export default function App() {
   const containerRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
+  const imagesRef = useRef<HTMLImageElement[]>([]);
   const [images, setImages] = useState<HTMLImageElement[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [loadProgress, setLoadProgress] = useState(0);
@@ -223,6 +224,7 @@ export default function App() {
         initialImages[j] = loadedImages[idx];
       }
       setImages(initialImages);
+      imagesRef.current = initialImages;
       setIsLoaded(true);
       setTimeout(() => setShowPopup(true), 1200);
 
@@ -239,6 +241,7 @@ export default function App() {
             const idx = Math.floor(j / step);
             updatedImages[j] = loadedImages[idx] || initialImages[j];
           }
+          imagesRef.current = updatedImages;
           setImages(updatedImages);
         }
       }
@@ -257,7 +260,7 @@ export default function App() {
 
     const render = () => {
       const idx = Math.floor(airbnb.current.frame);
-      const img = images[idx];
+      const img = imagesRef.current[idx];
       if (img && img.complete) {
         const cA = canvas.width / canvas.height;
         const iA = img.width / img.height;
@@ -329,8 +332,8 @@ export default function App() {
         clearProps: "filter",
         scrollTrigger: {
           trigger: section,
-          start: "top 80%",
-          toggleActions: "play none none reverse"
+          start: "top 85%",
+          once: true // Only run once for a premium, non-repetitive feel
         }
       });
 
@@ -365,7 +368,7 @@ export default function App() {
     });
 
     return () => { window.removeEventListener('resize', handleResize); ScrollTrigger.getAll().forEach(t => t.kill()); };
-  }, [isLoaded, images]);
+  }, [isLoaded]);
 
   // Custom Cursor
   useEffect(() => {
