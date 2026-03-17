@@ -186,52 +186,65 @@ export default function App() {
 
   const ctaGlowOpacity = useTransform(scrollYProgress, [0.85, 0.95], [0, 1]);
 
-  // Preload images with progress
+  // 🧊 Optimized Progressive Loader
   useEffect(() => {
-    let loadedCount = 0;
-
     const isMobile = window.innerWidth < 768;
-    const step = isMobile ? 3 : 1; 
+    const step = isMobile ? 3 : 1;
     const totalToLoad = Math.ceil(frameCount / step);
     const loadedImages: HTMLImageElement[] = new Array(totalToLoad);
+    let loadedCount = 0;
 
-    const loadSequentially = async () => {
-      for (let i = 0; i < totalToLoad; i++) {
-        const frameIndex = (i * step) + 1;
-        const img = new Image();
-        img.src = `/frames/output_${frameIndex.toString().padStart(4, '0')}.jpg`;
-        
-        await new Promise((resolve) => {
+    const loadBatch = async (indices: number[]) => {
+      await Promise.all(indices.map(i => {
+        return new Promise((resolve) => {
+          const frameIndex = (i * step) + 1;
+          const img = new Image();
+          img.src = `/frames/output_${frameIndex.toString().padStart(4, '0')}.jpg`;
           img.onload = () => {
-            loadedCount++;
             loadedImages[i] = img;
-            if (loadedCount % 10 === 0 || loadedCount === totalToLoad) {
-              setLoadProgress(Math.round((loadedCount / totalToLoad) * 100));
-            }
+            loadedCount++;
+            setLoadProgress(Math.round((loadedCount / totalToLoad) * 100));
             resolve(null);
           };
-          img.onerror = () => resolve(null); // Skip broken frames
+          img.onerror = () => resolve(null);
         });
-
-        // Small break every 20 images on mobile to let GC breathe
-        if (isMobile && i % 20 === 0) await new Promise(r => setTimeout(r, 10));
-      }
-
-      // Reconstruct frame map
-      const finalImages: HTMLImageElement[] = [];
-      for (let j = 0; j < loadedImages.length; j++) {
-        if (isMobile) {
-          for (let k = 0; k < step; k++) finalImages.push(loadedImages[j] || loadedImages[Math.max(0, j-1)]);
-        } else {
-          finalImages.push(loadedImages[j]);
-        }
-      }
-      setImages(finalImages);
-      setIsLoaded(true);
-      setTimeout(() => setShowPopup(true), 1500);
+      }));
     };
 
-    loadSequentially();
+    const startLoading = async () => {
+      // 1. Critical Batch: Load first 60 frames immediately (Experience Start)
+      const criticalBatch = Array.from({ length: Math.min(60, totalToLoad) }, (_, i) => i);
+      await loadBatch(criticalBatch);
+      
+      // Reconstruct initial map so we can at least show the first part
+      const initialImages: HTMLImageElement[] = new Array(frameCount);
+      for (let j = 0; j < initialImages.length; j++) {
+        const idx = Math.floor(j / step);
+        initialImages[j] = loadedImages[idx];
+      }
+      setImages(initialImages);
+      setIsLoaded(true);
+      setTimeout(() => setShowPopup(true), 1200);
+
+      // 2. Background Batching: Load rest in chunks of 15
+      const remainingIndices = Array.from({ length: totalToLoad - 60 }, (_, i) => i + 60);
+      for (let i = 0; i < remainingIndices.length; i += 15) {
+        const batch = remainingIndices.slice(i, i + 15);
+        await loadBatch(batch);
+        
+        // Update images map periodically as background loads finish
+        if (i % 60 === 0 || i + 15 >= remainingIndices.length) {
+          const updatedImages: HTMLImageElement[] = new Array(frameCount);
+          for (let j = 0; j < updatedImages.length; j++) {
+            const idx = Math.floor(j / step);
+            updatedImages[j] = loadedImages[idx] || initialImages[j];
+          }
+          setImages(updatedImages);
+        }
+      }
+    };
+
+    startLoading();
   }, []);
 
   // Canvas + GSAP
@@ -249,9 +262,18 @@ export default function App() {
         const cA = canvas.width / canvas.height;
         const iA = img.width / img.height;
         let dW, dH, oX = 0, oY = 0;
-        if (cA > iA) { dW = canvas.width; dH = canvas.width / iA; oY = (canvas.height - dH) / 2; }
-        else { dH = canvas.height; dW = canvas.height * iA; oX = (canvas.width - dW) / 2; }
-        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (cA > iA) {
+          dW = canvas.width;
+          dH = canvas.width / iA;
+          oY = (canvas.height - dH) / 2;
+        } else {
+          dH = canvas.height;
+          dW = canvas.height * iA;
+          oX = (canvas.width - dW) / 2;
+        }
+
+        // Draw image directly over previous frame for smoother transitions
         context.drawImage(img, oX, oY, dW, dH);
       }
       if (progressRef.current) {
@@ -259,13 +281,17 @@ export default function App() {
       }
     };
 
-    const handleResize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; render(); };
+    const handleResize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      render();
+    };
+
     window.addEventListener('resize', handleResize);
     handleResize();
 
     // Section reveals, Background Story-Sync, and Mobile Interactivity
     document.querySelectorAll('section').forEach((section, index) => {
-      // Syncing frames specifically for key story moments to create a 'Background Storyteller' effect
       const sectionFlow = [
         { id: 'hero', start: 0, end: 110 },
         { id: 'problem', start: 111, end: 240 },
@@ -281,13 +307,12 @@ export default function App() {
       if (flow) {
         gsap.to(airbnb.current, {
           frame: flow.end,
-          snap: "frame",
-          ease: "none",
+          ease: "sine.inOut",
           scrollTrigger: {
             trigger: section,
             start: "top 50%",
             end: "bottom 50%",
-            scrub: window.innerWidth < 768 ? 0.3 : 1.2, // Faster scrub for mobile to prevent lag
+            scrub: window.innerWidth < 768 ? 0.8 : 2.5, // Heavier scrub for buttery cinematic lag
             onUpdate: render
           }
         });
@@ -296,12 +321,12 @@ export default function App() {
       gsap.from(section.querySelectorAll('.reveal'), {
         y: 40,
         opacity: 0,
-        filter: section.id === 'cta' ? "none" : "blur(10px)", // Disable blur for CTA to avoid image issues
+        filter: section.id === 'cta' ? "none" : "blur(10px)",
         scale: 0.95,
         duration: 1.2,
         stagger: 0.15,
         ease: "power4.out",
-        clearProps: "filter", // Ensure blur doesn't stick
+        clearProps: "filter",
         scrollTrigger: {
           trigger: section,
           start: "top 80%",
@@ -374,7 +399,12 @@ export default function App() {
       {isLoaded && <AnimatedNavFramer />}
 
       {/* Background */}
-      <canvas ref={canvasRef} className="fixed top-0 left-0 w-full h-full object-cover z-0 contrast-[1.1] brightness-[0.85]" aria-hidden="true" />
+      <canvas 
+        ref={canvasRef} 
+        className="fixed top-0 left-0 w-full h-full object-cover z-0 contrast-[1.1] brightness-[0.85] will-change-transform"
+        style={{ transform: 'translateZ(0)' }} // Force GPU
+        aria-hidden="true" 
+      />
       <div ref={overlayRef} className="fixed inset-0 bg-[var(--bg-base)] z-1 pointer-events-none" style={{ transition: 'opacity 2s var(--ease-out)', opacity: 0.3 }} aria-hidden="true" />
 
       {/* Atmosphere */}
@@ -394,8 +424,13 @@ export default function App() {
       {!isLoaded && (
         <div className="fixed inset-0 z-[1000] bg-[var(--bg-deep)] flex items-center justify-center flex-col">
           <LoadingLines />
-          <div className="text-zinc-600 text-[10px] tracking-[0.6em] uppercase mt-12 font-black animate-pulse">
-            Establishing Horizon...
+          <div className="flex flex-col items-center gap-4 mt-12">
+            <div className="text-zinc-600 text-[10px] tracking-[0.6em] uppercase font-black animate-pulse">
+              Establishing Horizon...
+            </div>
+            <div className="text-[var(--accent)] text-[11px] font-black font-mono tracking-widest">
+              {loadProgress}%
+            </div>
           </div>
         </div>
       )}
