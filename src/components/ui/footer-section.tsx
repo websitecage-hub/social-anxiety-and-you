@@ -42,7 +42,7 @@ const footerLinks: FooterSection[] = [
     label: 'Connect',
     links: [
       { title: 'YouTube', href: 'https://www.youtube.com/@UnleashTBofficial', icon: YoutubeIcon },
-      { title: 'Instagram', href: '#', icon: InstagramIcon },
+      { title: 'Instagram', href: 'https://www.instagram.com/unleashthe.b?igsh=eW5mNnBnM3hvMmJs', icon: InstagramIcon },
     ],
   },
 ];
