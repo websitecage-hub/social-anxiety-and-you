@@ -10,8 +10,10 @@ import { Footer } from './components/ui/footer-section';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { motion, useScroll, useTransform, useSpring, useMotionValue, AnimatePresence } from 'framer-motion';
-import { Zap, ShieldCheck, Smartphone, ArrowRight, Info, CheckCircle2, X, AlertCircle, Users, BarChart3, Heart } from 'lucide-react';
+import { Zap, ShieldCheck, Smartphone, ArrowRight, Info, CheckCircle2, X, AlertCircle, Users, BarChart3, Heart, Mail, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import emailjs from '@emailjs/browser';
+import * as THREE from 'three';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -21,6 +23,12 @@ declare global {
     Razorpay: any;
   }
 }
+
+// 📧 EBOOK EMAIL SYSTEM CONFIGURATION (Get these from emailjs.com)
+const EMAILJS_SERVICE_ID = "service_xxxxxxx";   // EmailJS Service ID
+const EMAILJS_TEMPLATE_ID = "template_xxxxxxx"; // EmailJS Template ID
+const EMAILJS_PUBLIC_KEY = "xxxxxxxxxxxxxxxxx"; // EmailJS Public API Key
+const EBOOK_DOWNLOAD_LINK = "https://drive.google.com/uc?export=download&id=1cOpMSnV5Uws9P6sK0owuWTtBHk6hPh_k";
 
 /* ── Uiverse Button Component ──────────────────── */
 function UiverseButton({ text, onClick }: { text: string; onClick: () => void }) {
@@ -72,75 +80,40 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
   );
 }
 
-/* ── Awareness Popup Component ─────────────────── */
+/* ── Awareness Popup Component (Compact) ────────── */
 function AwarenessPopup({ onClose }: { onClose: () => void }) {
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-black/90 backdrop-blur-2xl"
+      className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
     >
       <motion.div
-        initial={{ scale: 0.95, y: 20, opacity: 0 }}
-        animate={{ scale: 1, y: 0, opacity: 1 }}
-        exit={{ scale: 0.95, y: 20, opacity: 0 }}
-        className="relative w-full max-w-2xl bg-[var(--bg-elevated)] border border-white/10 rounded-2xl shadow-[0_50px_100px_rgba(0,0,0,0.8)] overflow-y-auto max-h-[90vh]"
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        className="relative w-full max-w-sm bg-[var(--bg-elevated)] border border-white/10 rounded-2xl shadow-2xl p-6 md:p-8"
       >
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[var(--accent)] to-transparent" />
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-red-600 to-transparent" />
         
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-6 h-6 rounded-full bg-red-600/20 flex items-center justify-center text-red-500">
+            <AlertCircle className="size-3" />
+          </div>
+          <span className="text-red-500 text-[9px] font-black uppercase tracking-widest">Global Status</span>
+        </div>
+
+        <p className="text-zinc-300 text-sm font-medium leading-relaxed mb-6">
+          Over <span className="text-white font-black">300 Million</span> people globally struggle with anxiety. This is not a personal failure—it is a collective challenge.
+        </p>
+
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-[var(--fg-subtle)] hover:text-[var(--fg-primary)] z-20 p-2 bg-black/20 rounded-full"
-          aria-label="Close"
+          className="w-full py-4 bg-red-600 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-red-700 transition-all active:scale-95"
         >
-          <X className="size-5" />
+          Begin The Journey
         </button>
-
-        <div className="p-6 md:p-10">
-          <div className="flex items-center gap-3 mb-4 md:mb-6">
-            <div className="w-8 h-8 rounded-full bg-[var(--accent-dim)]/30 flex items-center justify-center text-[var(--accent)]">
-              <AlertCircle className="size-4" />
-            </div>
-            <span className="text-[var(--accent)] text-[9px] md:text-[11px] font-black uppercase tracking-[0.4em]">
-              Global Awareness
-            </span>
-          </div>
-
-          <h3 className="text-[var(--fg-primary)] text-xl md:text-4xl font-black uppercase tracking-tighter leading-[1.1] mb-6 md:mb-8">
-            You are <span className="text-glow">Not Alone</span> <br className="hidden md:block" /> in this struggle.
-          </h3>
-
-          <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-2 gap-3 md:gap-6">
-            {[
-              { icon: <Users className="size-4" />, label: "WHO Report", val: "300 Million+", desc: "People worldwide with anxiety." },
-              { icon: <BarChart3 className="size-4" />, label: "Global Stats", val: "Up to 13%", desc: "Experience social anxiety." },
-              { icon: <Heart className="size-4" />, label: "Daily Life", val: "5% — 10%", desc: "Face daily clinical struggle." },
-              { icon: <Info className="size-4" />, label: "Youth Impact", val: "9% Teens", desc: "Suffer before adulthood." }
-            ].map((stat, i) => (
-              <div key={i} className="bg-white/5 border border-white/5 p-4 md:p-5 rounded-xl">
-                <div className="flex items-center gap-3 mb-2">
-                  <span className="text-[var(--fg-subtle)] opacity-50">{stat.icon}</span>
-                  <span className="text-[8px] md:text-[10px] text-[var(--fg-subtle)] font-bold uppercase tracking-widest">{stat.label}</span>
-                </div>
-                <p className="text-[var(--fg-primary)] text-base md:text-lg font-black leading-tight">{stat.val}</p>
-                <p className="text-[9px] md:text-[11px] text-[var(--fg-muted)] mt-1 font-medium leading-tight">{stat.desc}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-6 md:mt-8 pt-6 md:pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-[8px] md:text-[10px] text-[var(--fg-subtle)] font-medium uppercase tracking-[0.2em] text-center md:text-left opacity-60">
-              Sourced: WHO, NIMH, Cleveland Clinic.
-            </p>
-            <button
-              onClick={onClose}
-              className="w-full md:w-auto px-6 py-3 bg-[var(--accent)] text-[var(--fg-primary)] text-[10px] md:text-[11px] font-black uppercase tracking-[0.3em] rounded-lg hover:brightness-125 transition-all"
-            >
-              Enter the Experience
-            </button>
-          </div>
-        </div>
       </motion.div>
     </motion.div>
   );
@@ -165,6 +138,109 @@ function ChapterCard({ number, title, description }: { number: string; title: st
 }
 
 /* ── Main Landing Page ───────────────────────────────────── */
+/* ── Liquid Three.js Background Component ── */
+function LiquidBackground() {
+  const mountRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!mountRef.current) return;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    mountRef.current.appendChild(renderer.domElement);
+
+    const geometry = new THREE.PlaneGeometry(15, 10, 128, 128);
+    const material = new THREE.ShaderMaterial({
+      uniforms: {
+        uTime: { value: 0 },
+        uColor: { value: new THREE.Color('#330000') }
+      },
+      vertexShader: `
+        varying vec2 vUv;
+        uniform float uTime;
+        
+        // Simplex 2D noise
+        vec3 permute(vec3 x) { return mod(((x*34.0)+1.0)*x, 289.0); }
+        float snoise(vec2 v){
+          const vec4 C = vec4(0.211324865405187, 0.366025403784439,
+                   -0.577350269189626, 0.024390243902439);
+          vec2 i  = floor(v + dot(v, C.yy) );
+          vec2 x0 = v -   i + dot(i, C.xx);
+          vec2 i1;
+          i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+          vec4 x12 = x0.xyxy + C.xxzz;
+          x12.xy -= i1;
+          i = mod(i, 289.0);
+          vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 ))
+          + i.x + vec3(0.0, i1.x, 1.0 ));
+          vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy),
+            dot(x12.zw,x12.zw)), 0.0);
+          m = m*m ;
+          m = m*m ;
+          vec3 x = 2.0 * fract(p * C.www) - 1.0;
+          vec3 h = abs(x) - 0.5;
+          vec3 ox = floor(x + 0.5);
+          vec3 a0 = x - ox;
+          m *= 1.79284291400159 - 0.85373472095314 * ( a0*a0 + h*h );
+          vec3 g;
+          g.x  = a0.x  * x0.x  + h.x  * x0.y;
+          g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+          return 130.0 * dot(m, g);
+        }
+
+        void main() {
+          vUv = uv;
+          vec3 pos = position;
+          float noise = snoise(pos.xy * 0.5 + uTime * 0.2);
+          pos.z += noise * 0.4;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+        }
+      `,
+      fragmentShader: `
+        varying vec2 vUv;
+        uniform float uTime;
+        uniform vec3 uColor;
+        void main() {
+          float dist = distance(vUv, vec2(0.5));
+          float alpha = smoothstep(0.5, 0.2, dist) * 0.4;
+          gl_FragColor = vec4(uColor, alpha);
+        }
+      `,
+      transparent: true,
+      wireframe: false
+    });
+
+    const mesh = new THREE.Mesh(geometry, material);
+    scene.add(mesh);
+    camera.position.z = 2;
+
+    const animate = () => {
+      material.uniforms.uTime.value += 0.01;
+      renderer.render(scene, camera);
+      requestAnimationFrame(animate);
+    };
+    animate();
+
+    const handleResize = () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    };
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      if (mountRef.current) mountRef.current.removeChild(renderer.domElement);
+    };
+  }, []);
+
+  return <div ref={mountRef} className="fixed inset-0 z-1 pointer-events-none opacity-40 mix-blend-screen" />;
+}
+
+/* ── Main Landing Page ───────────────────────────────────── */
 export default function LandingPage() {
   const navigate = useNavigate();
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -177,22 +253,23 @@ export default function LandingPage() {
   const [loadProgress, setLoadProgress] = useState(0);
   const [showPopup, setShowPopup] = useState(false);
 
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [userData, setUserData] = useState({ name: '', email: '', mobile: '' });
+  const [formErrors, setFormErrors] = useState({ email: '', mobile: '' });
+  const [isLoadingCheckout, setIsLoadingCheckout] = useState(false);
+
   const frameCount = 1785;
   const airbnb = useRef({ frame: 0 });
 
-  // Framer Motion Scroll for dynamic book
+  // Framer Motion Scroll
   const { scrollYProgress } = useScroll();
-  const ctaScale = useTransform(scrollYProgress, [0.85, 0.95], [0.8, 1]);
-  const ctaRotate = useTransform(scrollYProgress, [0.85, 0.95], [-10, 0]);
-  const smoothCtaScale = useSpring(ctaScale, { stiffness: 100, damping: 30 });
-  const smoothCtaRotate = useSpring(ctaRotate, { stiffness: 100, damping: 30 });
-
   const ctaGlowOpacity = useTransform(scrollYProgress, [0.85, 0.95], [0, 1]);
 
-  // 🧊 Optimized Progressive Loader (30 FPS Version)
+  // 🧊 Optimized Progressive Loader (Extreme Performance Mode)
   useEffect(() => {
     const isMobile = window.innerWidth < 768;
-    const step = isMobile ? 6 : 3; // Efficient sampling for 30fps fluidity
+    const step = isMobile ? 12 : 8; // Heavy optimization: Loading fewer frames to save memory
     const totalToLoad = Math.ceil(frameCount / step);
     const loadedImages: HTMLImageElement[] = new Array(totalToLoad);
     let loadedCount = 0;
@@ -229,7 +306,8 @@ export default function LandingPage() {
       setImages(initialImages);
       imagesRef.current = initialImages;
       setIsLoaded(true);
-      setTimeout(() => setShowPopup(true), 1200);
+      
+      setShowPopup(true);
 
       // 2. Background Batching: Load rest in larger chunks for 30fps
       const remainingIndices = Array.from({ length: totalToLoad - criticalCount }, (_, i) => i + criticalCount);
@@ -325,18 +403,15 @@ export default function LandingPage() {
       }
 
       gsap.from(section.querySelectorAll('.reveal'), {
-        y: 40,
+        y: 30,
         opacity: 0,
-        filter: section.id === 'cta' ? "none" : "blur(10px)",
-        scale: 0.95,
-        duration: 1.2,
-        stagger: 0.15,
-        ease: "power4.out",
-        clearProps: "filter",
+        duration: 1.0,
+        stagger: 0.1,
+        ease: "power2.out",
         scrollTrigger: {
           trigger: section,
-          start: "top 85%",
-          once: true // Only run once for a premium, non-repetitive feel
+          start: "top 90%",
+          once: true
         }
       });
 
@@ -382,22 +457,155 @@ export default function LandingPage() {
     return () => window.removeEventListener('mousemove', move);
   }, [isLoaded]);
 
+  // 🧹 CLEANUP & RESET FORM
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setIsLoadingCheckout(false);
+    // Only reset data if fully closing to avoid frustration on accidental clicks, 
+    // but here we follow user request for full reset.
+    setUserData({ name: '', email: '', mobile: '' });
+    setFormErrors({ email: '', mobile: '' });
+  };
+
+  // ── CONFIGURATION ──
+  const BASE_URL = "https://say-backend.onrender.com";
+
   // Razorpay Handle Payment
-  const handlePayment = () => {
-    const options = {
-      key: "rzp_live_SPxvJUDxfHYcG6",
-      amount: 100, // 1 Rupee = 100 paise
-      currency: "INR",
-      name: "Unleash The Beast",
-      description: "Social Anxiety And YOU - Ebook",
-      handler: function (response: any) {
-        navigate(`/success?id=${response.razorpay_payment_id}`);
-      },
-      prefill: { name: "", email: "", contact: "" },
-      theme: { color: "#991b1b" }
-    };
-    const rzp = new window.Razorpay(options);
-    rzp.open();
+  const initiateCheckout = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    
+    // 🔍 FORM VALIDATION
+    let errors = { email: '', mobile: '' };
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^\+?[\d\s-]{10,}$/;
+
+    if (!emailRegex.test(userData.email)) errors.email = "Please enter a valid email address.";
+    if (!phoneRegex.test(userData.mobile)) errors.mobile = "Please enter a valid mobile number.";
+
+    if (errors.email || errors.mobile) {
+      setFormErrors(errors);
+      return;
+    }
+
+    setFormErrors({ email: '', mobile: '' });
+    setIsLoadingCheckout(true);
+
+    // 📓 Log data to console for tracking
+    console.log("Checkout Initiated:", userData);
+    
+    try {
+      // 1. 📇 Backend Lead Capture (Parallel)
+      fetch(`${BASE_URL}/api/leads`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData)
+      }).catch(() => {}); // ignore capture failure during checkout
+
+      // 2. 🎟️ Create Real Razorpay Order via Backend
+      const orderResponse = await fetch(`${BASE_URL}/create-order`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: 100 }) // ₹1.00 for testing
+      });
+
+      const orderData = await orderResponse.json();
+
+      if (!orderData.success || !orderData.order_id) {
+        throw new Error(orderData.message || "Backend failed to generate order_id");
+      }
+
+      console.log("📦 Order Created:", orderData.order_id);
+
+      // 2.5 🗄️ Save User to Supabase (Pending)
+      await fetch(`${BASE_URL}/save-user`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: userData.name,
+          email: userData.email,
+          phone: userData.mobile,
+          order_id: orderData.order_id
+        })
+      }).catch(err => console.error("Supabase Save Error:", err));
+
+      // 3. 💳 Launch Dynamic Razorpay Checkout
+      const options = {
+        key: "rzp_test_SSfFE0Q0wDz1az", // Test Key
+        amount: 100, 
+        currency: "INR",
+        name: "Unleash The Beast",
+        description: "Social Anxiety And YOU - Ebook Access",
+        order_id: orderData.order_id, // REAL Dynamic Order ID
+        handler: async function (response: any) {
+          try {
+            // 🏆 Log captured payment values
+            console.log("💰 CHECKOUT SUCCESS. VERIFYING SIGNATURE...");
+
+            // 4. 🛰️ Send to Backend for Cryptographic Verification
+            const verifyResponse = await fetch(`${BASE_URL}/verify-payment`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+              })
+            });
+
+            const verifyData = await verifyResponse.json();
+
+            if (verifyData.success) {
+              console.log("✅ PAYMENT VERIFIED ON SERVER");
+
+              // 5. 🗄️ Update Database to Success
+              await fetch(`${BASE_URL}/update-payment`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  order_id: response.razorpay_order_id,
+                  payment_id: response.razorpay_payment_id
+                })
+              }).catch(err => console.error("Supabase Update Error:", err));
+
+              alert(`🎉 PAYMENT SUCCESSFUL & VERIFIED!\n\nThank you, ${userData.name}. Your access is now live.`);
+              
+              setIsLoadingCheckout(false);
+              setIsModalOpen(false);
+              
+              // Secure redirect to success page
+              navigate(`/success?id=${response.razorpay_payment_id}&name=${encodeURIComponent(userData.name)}`);
+            } else {
+              throw new Error("Payment signature verification failed. Possible fraud.");
+            }
+
+          } catch (err: any) {
+            console.error("❌ Verification Failed:", err);
+            alert("Security Error: Payment verification failed. Please contact support.");
+            setIsLoadingCheckout(false);
+          }
+        },
+        prefill: { 
+          name: userData.name, 
+          email: userData.email, 
+          contact: userData.mobile 
+        },
+        theme: { color: "#991b1b" },
+        modal: {
+          ondismiss: function() {
+            setIsLoadingCheckout(false);
+            console.log("💳 Checkout dismissed by user.");
+          }
+        }
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+
+    } catch (err: any) {
+      console.error("🚨 Checkout System Error:", err);
+      alert("System Error: Unable to reach payment gateway. Please ensure backend is running.");
+      setIsLoadingCheckout(false);
+    }
   };
 
   return (
@@ -426,6 +634,9 @@ export default function LandingPage() {
         <div ref={progressRef} className="h-full bg-gradient-to-r from-[var(--accent-dim)] via-[var(--accent)] to-red-600" style={{ width: '0%', transition: 'width 0.15s linear', boxShadow: '0 0 16px var(--accent-glow)' }} />
       </div>
 
+      {/* Liquid Background (Three.js) */}
+      <LiquidBackground />
+
       {/* Loading */}
       {!isLoaded && (
         <div className="fixed inset-0 z-[1000] bg-[var(--bg-deep)] flex items-center justify-center flex-col">
@@ -440,6 +651,133 @@ export default function LandingPage() {
           </div>
         </div>
       )}
+
+      {/* 📧 Lead Capture Checkout Modal (Sleek & Simple) */}
+      <AnimatePresence>
+        {isModalOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[3000] bg-black/90 backdrop-blur-md flex items-center justify-center p-4 md:p-6"
+          >
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0, y: 10 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 10 }}
+              className="bg-[#0c0c0c] border border-white/5 p-8 md:p-14 rounded-[40px] max-w-lg w-full relative shadow-[0_0_100px_rgba(0,0,0,1)] selection:bg-red-600/30"
+            >
+              <button 
+                onClick={handleCloseModal}
+                className="absolute top-8 right-8 text-zinc-600 hover:text-white transition-colors"
+                aria-label="Close modal"
+              >
+                <X className="size-5" />
+              </button>
+
+              <div className="mb-12">
+                <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter text-white mb-2">Secure Checkout</h2>
+                <div className="flex items-center gap-3">
+                   <div className="h-[1px] w-8 bg-red-600" />
+                   <p className="text-zinc-500 text-[10px] uppercase tracking-[0.3em] font-bold">Unleash The Beast Access</p>
+                </div>
+              </div>
+
+              <form onSubmit={initiateCheckout} className="space-y-8">
+                <div className="grid grid-cols-1 gap-6">
+                  {/* Name Input */}
+                  <div className="group relative">
+                    <label className="absolute -top-2.5 left-4 bg-[#0c0c0c] px-2 text-[10px] font-black uppercase tracking-widest text-zinc-500 group-focus-within:text-red-600 transition-colors z-10">
+                      Full Name
+                    </label>
+                    <div className="relative">
+                      <Users className="absolute left-5 top-1/2 -translate-y-1/2 size-4 text-zinc-700 group-focus-within:text-red-600 transition-colors" />
+                      <input 
+                        required
+                        type="text" 
+                        placeholder="e.g. John Doe"
+                        className="w-full bg-white/[0.02] border border-white/10 rounded-2xl pl-14 pr-6 py-5 text-white placeholder:text-zinc-800 focus:border-red-600/50 focus:bg-white/[0.04] outline-none transition-all"
+                        value={userData.name}
+                        onChange={(e) => setUserData({...userData, name: e.target.value})}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Email Input */}
+                  <div className="group relative">
+                    <label className="absolute -top-2.5 left-4 bg-[#0c0c0c] px-2 text-[10px] font-black uppercase tracking-widest text-zinc-500 group-focus-within:text-red-600 transition-colors z-10">
+                      Email Address
+                    </label>
+                    <div className="relative">
+                      <Mail className="absolute left-5 top-1/2 -translate-y-1/2 size-4 text-zinc-700 group-focus-within:text-red-600 transition-colors" />
+                      <input 
+                        required
+                        type="email" 
+                        placeholder="john@example.com"
+                        className={`w-full bg-white/[0.02] border ${formErrors.email ? 'border-red-500/50' : 'border-white/10'} rounded-2xl pl-14 pr-6 py-5 text-white placeholder:text-zinc-800 focus:border-red-600/50 focus:bg-white/[0.04] outline-none transition-all`}
+                        value={userData.email}
+                        onChange={(e) => {
+                          setUserData({...userData, email: e.target.value});
+                          if (formErrors.email) setFormErrors({...formErrors, email: ''});
+                        }}
+                      />
+                    </div>
+                    {formErrors.email && (
+                      <p className="text-[9px] text-red-500 font-bold uppercase tracking-widest mt-2 ml-1 animate-pulse">
+                        <AlertCircle className="inline size-3 mr-1 align-middle" /> {formErrors.email}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Mobile Input */}
+                  <div className="group relative">
+                    <label className="absolute -top-2.5 left-4 bg-[#0c0c0c] px-2 text-[10px] font-black uppercase tracking-widest text-zinc-500 group-focus-within:text-red-600 transition-colors z-10">
+                      Mobile Number
+                    </label>
+                    <div className="relative">
+                      <Smartphone className="absolute left-5 top-1/2 -translate-y-1/2 size-4 text-zinc-700 group-focus-within:text-red-600 transition-colors" />
+                      <input 
+                        required
+                        type="tel" 
+                        placeholder="+91 00000 00000"
+                        className={`w-full bg-white/[0.02] border ${formErrors.mobile ? 'border-red-500/50' : 'border-white/10'} rounded-2xl pl-14 pr-6 py-5 text-white placeholder:text-zinc-800 focus:border-red-600/50 focus:bg-white/[0.04] outline-none transition-all`}
+                        value={userData.mobile}
+                        onChange={(e) => {
+                          setUserData({...userData, mobile: e.target.value});
+                          if (formErrors.mobile) setFormErrors({...formErrors, mobile: ''});
+                        }}
+                      />
+                    </div>
+                    {formErrors.mobile && (
+                      <p className="text-[9px] text-red-500 font-bold uppercase tracking-widest mt-2 ml-1 animate-pulse">
+                        <AlertCircle className="inline size-3 mr-1 align-middle" /> {formErrors.mobile}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="pt-4">
+                  <button 
+                    type="submit"
+                    disabled={isLoadingCheckout}
+                    className={`group relative w-full ${isLoadingCheckout ? 'bg-zinc-800 pointer-events-none' : 'bg-red-600 hover:bg-red-700'} text-white font-black uppercase tracking-[0.2em] py-6 rounded-2xl flex items-center justify-center gap-4 transition-all overflow-hidden shadow-[0_20px_40px_rgba(220,38,38,0.2)] active:scale-[0.98]`}
+                  >
+                    <span className="relative z-10">{isLoadingCheckout ? 'Initializing...' : 'Proceed to Payment'}</span>
+                    {!isLoadingCheckout && <ArrowRight className="size-4 relative z-10 group-hover:translate-x-1 transition-transform" /> }
+                    {isLoadingCheckout && <Sparkles className="size-4 animate-spin" />}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-[100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-center gap-3 opacity-20 pt-4 grayscale">
+                  <ShieldCheck className="size-4 text-white" />
+                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white">Verified Secure Session</span>
+                </div>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Awareness Popup */}
       <AnimatePresence>
@@ -478,7 +816,7 @@ export default function LandingPage() {
             </p>
 
             <div className="reveal mt-[var(--space-8)] flex flex-wrap items-center gap-[var(--space-6)]">
-              <UiverseButton text="BUY NOW" onClick={handlePayment} />
+              <UiverseButton text={isLoadingCheckout ? "LOADING..." : "BUY NOW"} onClick={() => setIsModalOpen(true)} />
 
               <div className="flex flex-col gap-1.5">
                 <div className="flex items-center gap-3 text-[10px] md:text-[11px] text-[var(--fg-subtle)] font-bold uppercase tracking-[0.2em]">
@@ -749,15 +1087,10 @@ export default function LandingPage() {
           <div className="max-w-4xl flex flex-col items-center relative z-10 w-full">
             {/* Dynamic Reveal Book Cover */}
             <motion.div
-              style={{
-                scale: smoothCtaScale,
-                rotateZ: smoothCtaRotate,
-                perspective: 1000
-              }}
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 1.2, ease: "circOut" }}
               className="mb-[var(--space-10)] relative group active:scale-95 transition-transform cursor-pointer"
             >
               {/* Outer Glow */}
@@ -794,7 +1127,7 @@ export default function LandingPage() {
             </div>
 
             <div className="reveal">
-              <UiverseButton text="GET THE BOOK NOW" onClick={handlePayment} />
+              <UiverseButton text={isLoadingCheckout ? "LOADING..." : "BUY THE EBOOK"} onClick={() => setIsModalOpen(true)} />
             </div>
 
             {/* Instant Access Section Refinement */}

@@ -131,11 +131,17 @@ type ViewAnimationProps = {
   key?: string | number;
 };
 
-function AnimatedContainer({ className, delay = 0.1, children, key }: ViewAnimationProps) {
+interface AnimatedContainerProps {
+  className?: string;
+  delay?: number;
+  children: React.ReactNode;
+}
+
+function AnimatedContainer({ className, delay = 0.1, children }: AnimatedContainerProps) {
   const shouldReduceMotion = useReducedMotion();
 
   if (shouldReduceMotion) {
-    return <div key={key} className={className}>{children}</div>;
+    return <div className={className}>{children}</div>;
   }
 
   return (

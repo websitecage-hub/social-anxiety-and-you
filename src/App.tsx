@@ -10,7 +10,7 @@ export default function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/success" element={<SuccessPage />} />
         {/* Support legacy paths if needed */}
-        <Route path="/secret-download-path-*" element={<SuccessPage />} />
+        <Route path="/secret-download-path/*" element={<SuccessPage />} />
       </Routes>
     </Router>
   );
