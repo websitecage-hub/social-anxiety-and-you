@@ -516,8 +516,8 @@ export default function LandingPage() {
 
       console.log("📦 Order Created:", orderData.order_id);
 
-      // 2.5 🗄️ Save User to Supabase (Pending)
-      await fetch(`${BASE_URL}/save-user`, {
+      // 2.5 🗄️ Save User to Supabase (Background)
+      fetch(`${BASE_URL}/save-user`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -557,8 +557,8 @@ export default function LandingPage() {
             if (verifyData.success) {
               console.log("✅ PAYMENT VERIFIED ON SERVER");
 
-              // 5. 🗄️ Update Database to Success
-              await fetch(`${BASE_URL}/update-payment`, {
+              // 5. 🗄️ Update Database to Success (Background)
+              fetch(`${BASE_URL}/update-payment`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -567,12 +567,10 @@ export default function LandingPage() {
                 })
               }).catch(err => console.error("Supabase Update Error:", err));
 
-              alert(`🎉 PAYMENT SUCCESSFUL & VERIFIED!\n\nThank you, ${userData.name}. Your access is now live.`);
-              
               setIsLoadingCheckout(false);
               setIsModalOpen(false);
               
-              // Secure redirect to success page
+              // Immediate Secure redirect to success page
               navigate(`/success?id=${response.razorpay_payment_id}&name=${encodeURIComponent(userData.name)}`);
             } else {
               throw new Error("Payment signature verification failed. Possible fraud.");
@@ -580,7 +578,6 @@ export default function LandingPage() {
 
           } catch (err: any) {
             console.error("❌ Verification Failed:", err);
-            alert("Security Error: Payment verification failed. Please contact support.");
             setIsLoadingCheckout(false);
           }
         },
