@@ -121,7 +121,7 @@ export default function SuccessPage() {
               If you experienced any issues while downloading or didn't receive the file, <span className="text-white font-bold underline decoration-red-600/40">please check your email inbox (including spam).</span>
             </p>
             <p className="text-[12px] text-zinc-500 leading-relaxed font-normal">
-              A permanent backup link has been sent to the email address you provided during checkout. For further help, contact <span className="text-white font-medium italic">support@unleashthebeast.com</span>
+              A permanent backup link has been sent to the email address you provided during checkout. For further help, contact <span className="text-white font-medium italic">officialunleashthebeast@gmail.com</span>
             </p>
           </div>
 
