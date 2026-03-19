@@ -96,7 +96,7 @@ function AwarenessPopup({ onClose }: { onClose: () => void }) {
         className="relative w-full max-w-sm bg-[var(--bg-elevated)] border border-white/10 rounded-2xl shadow-2xl p-6 md:p-8"
       >
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-red-600 to-transparent" />
-        
+
         <div className="flex items-center gap-3 mb-4">
           <div className="w-6 h-6 rounded-full bg-red-600/20 flex items-center justify-center text-red-500">
             <AlertCircle className="size-3" />
@@ -296,7 +296,7 @@ export default function LandingPage() {
       const criticalCount = Math.ceil(180 / step);
       const criticalBatch = Array.from({ length: Math.min(criticalCount, totalToLoad) }, (_, i) => i);
       await loadBatch(criticalBatch);
-      
+
       // Reconstruct initial map so we can at least show the first part
       const initialImages: HTMLImageElement[] = new Array(frameCount);
       for (let j = 0; j < initialImages.length; j++) {
@@ -306,7 +306,7 @@ export default function LandingPage() {
       setImages(initialImages);
       imagesRef.current = initialImages;
       setIsLoaded(true);
-      
+
       setShowPopup(true);
 
       // 2. Background Batching: Load rest in larger chunks for 30fps
@@ -314,7 +314,7 @@ export default function LandingPage() {
       for (let i = 0; i < remainingIndices.length; i += 30) {
         const batch = remainingIndices.slice(i, i + 30);
         await loadBatch(batch);
-        
+
         // Update images map periodically as background loads finish
         if (i % 120 === 0 || i + 30 >= remainingIndices.length) {
           const updatedImages: HTMLImageElement[] = new Array(frameCount);
@@ -469,15 +469,15 @@ export default function LandingPage() {
 
   // ── CONFIGURATION ──
   // ⚠️ EDIT THESE SETTINGS FOR PRODUCTION ⚠️
-  const RAZORPAY_LIVE_KEY_ID = "YOUR_LIVE_KEY_HERE"; // Put your rzp_live_ key here
+  const RAZORPAY_LIVE_KEY_ID = "rzp_live_SSdoLbpNzB9Dzi"; // Put your rzp_live_ key here
   const EBOOK_PRICE_INR = 99; // Put your actual eBook price here (e.g. 99, 149)
-  
+
   const BASE_URL = "https://say-backend-ux5j.onrender.com";
 
   // Razorpay Handle Payment
   const initiateCheckout = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    
+
     // 🔍 FORM VALIDATION
     let errors = { email: '', mobile: '' };
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -496,7 +496,7 @@ export default function LandingPage() {
 
     // 📓 Log data to console for tracking
     console.log("Checkout Initiated:", userData);
-    
+
     try {
       const orderAmountPaise = EBOOK_PRICE_INR * 100; // Razorpay uses paise
 
@@ -505,13 +505,13 @@ export default function LandingPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userData)
-      }).catch(() => {}); // ignore capture failure during checkout
+      }).catch(() => { }); // ignore capture failure during checkout
 
       // 2. 🎟️ Create Real Razorpay Order via Backend
       const orderResponse = await fetch(`${BASE_URL}/create-order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: orderAmountPaise }) 
+        body: JSON.stringify({ amount: orderAmountPaise })
       });
 
       const orderData = await orderResponse.json();
@@ -537,7 +537,7 @@ export default function LandingPage() {
       // 3. 💳 Launch Dynamic Razorpay Checkout
       const options = {
         key: RAZORPAY_LIVE_KEY_ID, // Uses Live Key
-        amount: orderAmountPaise, 
+        amount: orderAmountPaise,
         currency: "INR",
         name: "Unleash The Beast",
         description: "Social Anxiety And YOU - Ebook Access",
@@ -575,7 +575,7 @@ export default function LandingPage() {
 
               setIsLoadingCheckout(false);
               setIsModalOpen(false);
-              
+
               // Immediate Secure redirect to success page
               navigate(`/success?id=${response.razorpay_payment_id}&name=${encodeURIComponent(userData.name)}`);
             } else {
@@ -587,14 +587,14 @@ export default function LandingPage() {
             setIsLoadingCheckout(false);
           }
         },
-        prefill: { 
-          name: userData.name, 
-          email: userData.email, 
-          contact: userData.mobile 
+        prefill: {
+          name: userData.name,
+          email: userData.email,
+          contact: userData.mobile
         },
         theme: { color: "#991b1b" },
         modal: {
-          ondismiss: function() {
+          ondismiss: function () {
             setIsLoadingCheckout(false);
             console.log("💳 Checkout dismissed by user.");
           }
@@ -616,11 +616,11 @@ export default function LandingPage() {
       {isLoaded && <AnimatedNavFramer />}
 
       {/* Background */}
-      <canvas 
-        ref={canvasRef} 
+      <canvas
+        ref={canvasRef}
         className="fixed top-0 left-0 w-full h-full object-cover z-0 contrast-[1.1] brightness-[0.85] will-change-transform"
         style={{ transform: 'translateZ(0)' }} // Force GPU
-        aria-hidden="true" 
+        aria-hidden="true"
       />
       <div ref={overlayRef} className="fixed inset-0 bg-[var(--bg-base)] z-1 pointer-events-none" style={{ transition: 'opacity 2s var(--ease-out)', opacity: 0.3 }} aria-hidden="true" />
 
@@ -658,19 +658,19 @@ export default function LandingPage() {
       {/* 📧 Lead Capture Checkout Modal (Sleek & Simple) */}
       <AnimatePresence>
         {isModalOpen && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[3000] bg-black/90 backdrop-blur-md flex items-center justify-center p-4 md:p-6"
           >
-            <motion.div 
+            <motion.div
               initial={{ scale: 0.95, opacity: 0, y: 10 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.95, opacity: 0, y: 10 }}
               className="bg-[#0c0c0c] border border-white/5 p-8 md:p-14 rounded-[40px] max-w-lg w-full relative shadow-[0_0_100px_rgba(0,0,0,1)] selection:bg-red-600/30"
             >
-              <button 
+              <button
                 onClick={handleCloseModal}
                 className="absolute top-8 right-8 text-zinc-600 hover:text-white transition-colors"
                 aria-label="Close modal"
@@ -681,8 +681,8 @@ export default function LandingPage() {
               <div className="mb-12">
                 <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter text-white mb-2">Secure Checkout</h2>
                 <div className="flex items-center gap-3">
-                   <div className="h-[1px] w-8 bg-red-600" />
-                   <p className="text-zinc-500 text-[10px] uppercase tracking-[0.3em] font-bold">Unleash The Beast Access</p>
+                  <div className="h-[1px] w-8 bg-red-600" />
+                  <p className="text-zinc-500 text-[10px] uppercase tracking-[0.3em] font-bold">Unleash The Beast Access</p>
                 </div>
               </div>
 
@@ -695,13 +695,13 @@ export default function LandingPage() {
                     </label>
                     <div className="relative">
                       <Users className="absolute left-5 top-1/2 -translate-y-1/2 size-4 text-zinc-700 group-focus-within:text-red-600 transition-colors" />
-                      <input 
+                      <input
                         required
-                        type="text" 
+                        type="text"
                         placeholder="e.g. John Doe"
                         className="w-full bg-white/[0.02] border border-white/10 rounded-2xl pl-14 pr-6 py-5 text-white placeholder:text-zinc-800 focus:border-red-600/50 focus:bg-white/[0.04] outline-none transition-all"
                         value={userData.name}
-                        onChange={(e) => setUserData({...userData, name: e.target.value})}
+                        onChange={(e) => setUserData({ ...userData, name: e.target.value })}
                       />
                     </div>
                   </div>
@@ -713,15 +713,15 @@ export default function LandingPage() {
                     </label>
                     <div className="relative">
                       <Mail className="absolute left-5 top-1/2 -translate-y-1/2 size-4 text-zinc-700 group-focus-within:text-red-600 transition-colors" />
-                      <input 
+                      <input
                         required
-                        type="email" 
+                        type="email"
                         placeholder="john@example.com"
                         className={`w-full bg-white/[0.02] border ${formErrors.email ? 'border-red-500/50' : 'border-white/10'} rounded-2xl pl-14 pr-6 py-5 text-white placeholder:text-zinc-800 focus:border-red-600/50 focus:bg-white/[0.04] outline-none transition-all`}
                         value={userData.email}
                         onChange={(e) => {
-                          setUserData({...userData, email: e.target.value});
-                          if (formErrors.email) setFormErrors({...formErrors, email: ''});
+                          setUserData({ ...userData, email: e.target.value });
+                          if (formErrors.email) setFormErrors({ ...formErrors, email: '' });
                         }}
                       />
                     </div>
@@ -739,15 +739,15 @@ export default function LandingPage() {
                     </label>
                     <div className="relative">
                       <Smartphone className="absolute left-5 top-1/2 -translate-y-1/2 size-4 text-zinc-700 group-focus-within:text-red-600 transition-colors" />
-                      <input 
+                      <input
                         required
-                        type="tel" 
+                        type="tel"
                         placeholder="+91 00000 00000"
                         className={`w-full bg-white/[0.02] border ${formErrors.mobile ? 'border-red-500/50' : 'border-white/10'} rounded-2xl pl-14 pr-6 py-5 text-white placeholder:text-zinc-800 focus:border-red-600/50 focus:bg-white/[0.04] outline-none transition-all`}
                         value={userData.mobile}
                         onChange={(e) => {
-                          setUserData({...userData, mobile: e.target.value});
-                          if (formErrors.mobile) setFormErrors({...formErrors, mobile: ''});
+                          setUserData({ ...userData, mobile: e.target.value });
+                          if (formErrors.mobile) setFormErrors({ ...formErrors, mobile: '' });
                         }}
                       />
                     </div>
@@ -760,13 +760,13 @@ export default function LandingPage() {
                 </div>
 
                 <div className="pt-4">
-                  <button 
+                  <button
                     type="submit"
                     disabled={isLoadingCheckout}
                     className={`group relative w-full ${isLoadingCheckout ? 'bg-zinc-800 pointer-events-none' : 'bg-red-600 hover:bg-red-700'} text-white font-black uppercase tracking-[0.2em] py-6 rounded-2xl flex items-center justify-center gap-4 transition-all overflow-hidden shadow-[0_20px_40px_rgba(220,38,38,0.2)] active:scale-[0.98]`}
                   >
                     <span className="relative z-10">{isLoadingCheckout ? 'Verifying...' : 'Claim Access'}</span>
-                    {!isLoadingCheckout && <ArrowRight className="size-4 relative z-10 group-hover:translate-x-1 transition-transform" /> }
+                    {!isLoadingCheckout && <ArrowRight className="size-4 relative z-10 group-hover:translate-x-1 transition-transform" />}
                     {isLoadingCheckout && <Sparkles className="size-4 animate-spin" />}
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-[100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
                   </button>
