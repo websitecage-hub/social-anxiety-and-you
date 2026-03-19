@@ -516,8 +516,8 @@ export default function LandingPage() {
 
       console.log("📦 Order Created:", orderData.order_id);
 
-      // 2.5 🗄️ Save User to Supabase (Background)
-      fetch(`${BASE_URL}/save-user`, {
+      // 2.5 🗄️ Save User to Supabase (Must be done before checkout)
+      await fetch(`${BASE_URL}/save-user`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -557,8 +557,8 @@ export default function LandingPage() {
             if (verifyData.success) {
               console.log("✅ PAYMENT VERIFIED ON SERVER");
 
-              // 5. 🗄️ Update Database to Success (Background)
-              fetch(`${BASE_URL}/update-payment`, {
+              // 5. 🗄️ Update Database to Success (Must be awaited before navigation)
+              await fetch(`${BASE_URL}/update-payment`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
