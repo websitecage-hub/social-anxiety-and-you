@@ -759,7 +759,7 @@ export default function LandingPage() {
                     disabled={isLoadingCheckout}
                     className={`group relative w-full ${isLoadingCheckout ? 'bg-zinc-800 pointer-events-none' : 'bg-red-600 hover:bg-red-700'} text-white font-black uppercase tracking-[0.2em] py-6 rounded-2xl flex items-center justify-center gap-4 transition-all overflow-hidden shadow-[0_20px_40px_rgba(220,38,38,0.2)] active:scale-[0.98]`}
                   >
-                    <span className="relative z-10">{isLoadingCheckout ? 'Processing...' : 'Proceed to Payment'}</span>
+                    <span className="relative z-10">{isLoadingCheckout ? 'Verifying...' : 'Claim Access'}</span>
                     {!isLoadingCheckout && <ArrowRight className="size-4 relative z-10 group-hover:translate-x-1 transition-transform" /> }
                     {isLoadingCheckout && <Sparkles className="size-4 animate-spin" />}
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-[100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
