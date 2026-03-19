@@ -468,6 +468,10 @@ export default function LandingPage() {
   };
 
   // ── CONFIGURATION ──
+  // ⚠️ EDIT THESE SETTINGS FOR PRODUCTION ⚠️
+  const RAZORPAY_LIVE_KEY_ID = "YOUR_LIVE_KEY_HERE"; // Put your rzp_live_ key here
+  const EBOOK_PRICE_INR = 99; // Put your actual eBook price here (e.g. 99, 149)
+  
   const BASE_URL = "https://say-backend-ux5j.onrender.com";
 
   // Razorpay Handle Payment
@@ -494,6 +498,8 @@ export default function LandingPage() {
     console.log("Checkout Initiated:", userData);
     
     try {
+      const orderAmountPaise = EBOOK_PRICE_INR * 100; // Razorpay uses paise
+
       // 1. 📇 Backend Lead Capture (Parallel)
       fetch(`${BASE_URL}/api/leads`, {
         method: 'POST',
@@ -505,7 +511,7 @@ export default function LandingPage() {
       const orderResponse = await fetch(`${BASE_URL}/create-order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: 100 }) // ₹1.00 for testing
+        body: JSON.stringify({ amount: orderAmountPaise }) 
       });
 
       const orderData = await orderResponse.json();
@@ -530,8 +536,8 @@ export default function LandingPage() {
 
       // 3. 💳 Launch Dynamic Razorpay Checkout
       const options = {
-        key: "rzp_test_SSfFE0Q0wDz1az", // Test Key
-        amount: 100, 
+        key: RAZORPAY_LIVE_KEY_ID, // Uses Live Key
+        amount: orderAmountPaise, 
         currency: "INR",
         name: "Unleash The Beast",
         description: "Social Anxiety And YOU - Ebook Access",
