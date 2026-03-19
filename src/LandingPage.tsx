@@ -470,7 +470,7 @@ export default function LandingPage() {
   // ── CONFIGURATION ──
   // ⚠️ EDIT THESE SETTINGS FOR PRODUCTION ⚠️
   const RAZORPAY_LIVE_KEY_ID = "rzp_live_SSdoLbpNzB9Dzi"; // Put your rzp_live_ key here
-  const EBOOK_PRICE_INR = 1; // Put your actual eBook price here (e.g. 99, 149)
+  const EBOOK_PRICE_INR = 89; // Put your actual eBook price here (e.g. 99, 149)
 
   const BASE_URL = "https://say-backend-ux5j.onrender.com";
 
